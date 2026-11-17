@@ -3,7 +3,7 @@ import { convertToAffiliate, detectStore, shopeeLastError, shopeeProductInfo } f
 import { rootDomain } from "@/lib/domain";
 import { addOffer } from "@/lib/historyStore";
 import { cleanTitle, extractMetadata, titleFromUrl } from "@/lib/metadata";
-import { amazonProductInfo, mercadoLivreProductInfo } from "@/lib/productApis";
+import { amazonProductInfo, mercadoLivreLastLog, mercadoLivreProductInfo } from "@/lib/productApis";
 import { clientIp, followRedirects, PREVIEW_UA, rateLimited } from "@/lib/netSafety";
 import { detectClone } from "@/lib/typosquat";
 
@@ -99,6 +99,8 @@ export async function POST(req: Request) {
     finalHost,
     domain: rootDomain(finalHost),
     wasShortened: page.hops > 0,
+    // Diagnóstico pedido explicitamente pelo cabeçalho x-diag: só rotas e códigos, nunca chaves.
+    ...(req.headers.get("x-diag") === "1" && store === "Mercado Livre" ? { mlApi: mercadoLivreLastLog() } : {}),
     // Só no computador de desenvolvimento: motivo de a API da Shopee não ter respondido.
     ...(process.env.NODE_ENV !== "production" && conversion.store === "Shopee" ? { shopeeApi: !process.env.SHOPEE_APP_ID || !process.env.SHOPEE_APP_SECRET ? "chaves não carregadas" : (shopeeLastError() ?? "ok") } : {}),
     clone,

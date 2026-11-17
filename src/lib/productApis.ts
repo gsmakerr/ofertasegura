@@ -145,6 +145,10 @@ export function parseMercadoLivre(json: unknown): ProductInfo {
   };
 }
 
+/** Diagnóstico da última consulta ao Mercado Livre: rotas e códigos de resposta (sem chaves). */
+const mlLog: string[] = [];
+export const mercadoLivreLastLog = () => [...mlLog];
+
 export async function mercadoLivreProductInfo(
   url: URL,
   env: { id?: string; secret?: string } = {
@@ -167,12 +171,31 @@ export async function mercadoLivreProductInfo(
       return d.access_token ? { token: d.access_token, ttl: d.expires_in ?? 21600 } : null;
     });
     if (!token) return EMPTY;
-    const res = await fetchImpl(`https://api.mercadolibre.com/${ids.kind}/${ids.id}`, {
-      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-      signal: AbortSignal.timeout(3500),
-    });
-    if (!res.ok) return EMPTY;
-    return parseMercadoLivre(await res.json());
+    const headers = { Authorization: `Bearer ${token}`, Accept: "application/json" };
+    const get = async (path: string) => {
+      const res = await fetchImpl(`https://api.mercadolibre.com${path}`, { headers, signal: AbortSignal.timeout(3000) });
+      mlLog.push(`${path.split("?")[0]} ${res.status}`);
+      return res.ok ? res.json() : null;
+    };
+    mlLog.length = 0;
+    if (ids.kind === "products") return parseMercadoLivre(await get(`/products/${ids.id}`));
+
+    // Anúncio comum: a consulta direta pode ser recusada a aplicativos de terceiros;
+    // tenta a consulta em lote e, se o anúncio estiver ligado ao catálogo, a página do produto.
+    const direct = await get(`/items/${ids.id}`);
+    if (direct) return parseMercadoLivre(direct);
+    const multi = (await get(`/items?ids=${ids.id}&attributes=title,pictures,thumbnail,secure_thumbnail,catalog_product_id`)) as
+      | { code?: number; body?: Record<string, unknown> }[]
+      | null;
+    const body = Array.isArray(multi) && multi[0]?.code === 200 ? multi[0].body : null;
+    if (body) {
+      const info = parseMercadoLivre(body);
+      if (info.image) return info;
+      const catalog = typeof body.catalog_product_id === "string" ? body.catalog_product_id : null;
+      if (catalog) return parseMercadoLivre(await get(`/products/${catalog}`));
+      return info;
+    }
+    return EMPTY;
   } catch {
     return EMPTY;
   }
