@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f4f7f5;
+  --color-card: #ffffff;
+  --color-ink: #12211e;
+  --color-muted: #4f6661;
+  --color-line: #d5dfdb;
+  --color-petrol: #0e4d45;
+  --color-petrol-deep: #093832;
+  --color-tag: #ffc933;
+  --color-tag-deep: #e5ae0f;
+  --color-ok: #1b7f47;
+  --color-ok-soft: #e2f3e8;
+  --color-warn: #a86a00;
+  --color-warn-soft: #fff3d1;
+  --color-risk: #b92f1a;
+  --color-risk-soft: #fde8e3;
+  --font-display: "Bricolage Grotesque Variable", system-ui, sans-serif;
+  --font-sans: "Figtree Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  background: var(--color-petrol);
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-tag-deep);
+  outline-offset: 2px;
+}
+
+/* O carimbo do resultado: único momento animado da página. */
+@keyframes carimbo {
+  0% { transform: rotate(-9deg) scale(1.9); opacity: 0; }
+  60% { transform: rotate(-9deg) scale(0.94); opacity: 1; }
+  100% { transform: rotate(-9deg) scale(1); opacity: 1; }
+}
+.carimbo {
+  transform: rotate(-9deg);
+  animation: carimbo 420ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+@keyframes subir {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.folha { animation: subir 220ms ease-out both; }
+
+@keyframes girar { to { transform: rotate(360deg); } }
+.girando { animation: girar 800ms linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .carimbo, .folha { animation: none; }
+  .carimbo { transform: rotate(-9deg); }
+}
