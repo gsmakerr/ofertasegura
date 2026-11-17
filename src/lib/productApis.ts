@@ -187,7 +187,9 @@ export async function mercadoLivreProductInfo(
     const multi = (await get(`/items?ids=${ids.id}&attributes=title,pictures,thumbnail,secure_thumbnail,catalog_product_id`)) as
       | { code?: number; body?: Record<string, unknown> }[]
       | null;
-    const body = Array.isArray(multi) && multi[0]?.code === 200 ? multi[0].body : null;
+    const first = Array.isArray(multi) ? multi[0] : undefined;
+    mlLog.push(`lote: código ${first?.code ?? "?"}, campos ${first?.body ? Object.keys(first.body).join(",").slice(0, 120) : "nenhum"}`);
+    const body = first?.code === 200 ? first.body : null;
     if (body) {
       const info = parseMercadoLivre(body);
       if (info.image) return info;
