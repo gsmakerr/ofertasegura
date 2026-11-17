@@ -3,6 +3,7 @@ import { convertToAffiliate, detectStore, shopeeLastError, shopeeProductInfo } f
 import { rootDomain } from "@/lib/domain";
 import { addOffer } from "@/lib/historyStore";
 import { cleanTitle, extractMetadata, titleFromUrl } from "@/lib/metadata";
+import { amazonProductInfo, mercadoLivreProductInfo } from "@/lib/productApis";
 import { clientIp, followRedirects, PREVIEW_UA, rateLimited } from "@/lib/netSafety";
 import { detectClone } from "@/lib/typosquat";
 
@@ -54,12 +55,19 @@ export async function POST(req: Request) {
   const first = extractMetadata(page.html, page.finalUrl);
   const needsMore = Boolean(store) && (!first.title || !first.image);
 
-  const [conversion, shopeeInfo, preview] = await Promise.all([
+  const finalUrl = new URL(page.finalUrl);
+  const [conversion, apiInfo, preview] = await Promise.all([
     convertToAffiliate(page.finalUrl),
-    // Shopee: título e foto pela API oficial (precisa das chaves).
-    needsMore && store === "Shopee"
-      ? shopeeProductInfo(new URL(page.finalUrl), process.env.SHOPEE_APP_ID, process.env.SHOPEE_APP_SECRET)
-      : Promise.resolve({ title: null, image: null }),
+    // Título e foto pela API oficial da loja (só funciona com as chaves configuradas).
+    !needsMore
+      ? Promise.resolve({ title: null, image: null })
+      : store === "Shopee"
+        ? shopeeProductInfo(finalUrl, process.env.SHOPEE_APP_ID, process.env.SHOPEE_APP_SECRET)
+        : store === "Amazon"
+          ? amazonProductInfo(finalUrl)
+          : store === "Mercado Livre"
+            ? mercadoLivreProductInfo(finalUrl)
+            : Promise.resolve({ title: null, image: null }),
     // A loja barrou a leitura comum: mesma leitura que WhatsApp e Facebook fazem para a prévia de um link.
     needsMore
       ? followRedirects(page.finalUrl, { userAgent: PREVIEW_UA, timeoutMs: 3500, maxHops: 3 })
@@ -68,8 +76,8 @@ export async function POST(req: Request) {
       : Promise.resolve({ title: null, image: null }),
   ]);
   const meta = {
-    title: first.title || cleanTitle(shopeeInfo.title) || preview.title,
-    image: first.image || shopeeInfo.image || preview.image,
+    title: first.title || cleanTitle(apiInfo.title) || preview.title,
+    image: first.image || apiInfo.image || preview.image,
   };
   const title = meta.title || cleanTitle(titleFromUrl(page.finalUrl));
   const finalHost = new URL(page.finalUrl).hostname.toLowerCase();
