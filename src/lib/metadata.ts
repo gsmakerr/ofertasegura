@@ -36,13 +36,24 @@ export function cleanTitle(raw: string | null): string | null {
   return t.slice(0, 160);
 }
 
+/** A Amazon não publica og:image; a foto principal fica no próprio HTML da página. */
+function amazonImage(html: string): string | null {
+  if (!html.includes("media-amazon.com")) return null;
+  const tag = html.match(/<img\b[^>]*\bid=["']landingImage["'][^>]*>/i)?.[0];
+  const attr = (name: string) =>
+    tag?.match(new RegExp(`\\b${name}=["'](https:\\/\\/m\\.media-amazon\\.com\\/images\\/I\\/[^"']+)["']`, "i"))?.[1];
+  const fromTag = attr("data-old-hires") || attr("src");
+  const hiRes = html.match(/"(?:hiRes|large)":"(https:\/\/m\.media-amazon\.com\/images\/I\/[^"]+)"/)?.[1];
+  return fromTag || hiRes || null;
+}
+
 export function extractMetadata(html: string, baseUrl: string): { title: string | null; image: string | null } {
   const head = html.slice(0, 400_000);
   const rawTitle =
     metaContent(head, "og:title") ||
     metaContent(head, "twitter:title") ||
     (head.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ? decodeEntities(head.match(/<title[^>]*>([\s\S]*?)<\/title>/i)![1]) : null);
-  const rawImage = metaContent(head, "og:image") || metaContent(head, "twitter:image");
+  const rawImage = metaContent(head, "og:image") || metaContent(head, "twitter:image") || amazonImage(head);
 
   let image: string | null = null;
   if (rawImage) {

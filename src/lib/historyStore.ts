@@ -61,7 +61,7 @@ async function blobStore() {
 }
 
 /** O histórico é complementar: se o armazenamento demorar, seguimos sem ele em vez de travar a página. */
-function withTimeout<T>(work: Promise<T>, ms = 2500): Promise<T> {
+function withTimeout<T>(work: Promise<T>, ms = 5000): Promise<T> {
   return Promise.race([
     work,
     new Promise<T>((_, reject) => setTimeout(() => reject(new Error("armazenamento lento")), ms)),

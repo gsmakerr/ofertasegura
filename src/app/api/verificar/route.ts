@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { convertToAffiliate, detectStore, shopeeLastError, shopeeProductInfo } from "@/lib/affiliateConverter";
 import { rootDomain } from "@/lib/domain";
 import { addOffer } from "@/lib/historyStore";
@@ -76,11 +76,9 @@ export async function POST(req: Request) {
   const clone = conversion.isAffiliate ? { status: "official" as const, brand: conversion.store! } : detectClone(finalHost);
 
   if (conversion.isAffiliate && conversion.store && title) {
-    try {
-      await addOffer({ title, image: meta.image, store: conversion.store, affiliateUrl: conversion.url });
-    } catch {
-      /* histórico é complementar: nunca derruba a verificação */
-    }
+    // Grava no histórico depois de responder, para o visitante não esperar por isso.
+    const offer = { title, image: meta.image, store: conversion.store, affiliateUrl: conversion.url };
+    after(() => addOffer(offer).catch(() => {}));
   }
 
   return NextResponse.json({

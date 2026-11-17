@@ -128,6 +128,11 @@ describe("metadados e segurança de rede", () => {
     );
     expect(m).toEqual({ title: "Fone JBL & Case", image: "https://img.x.com/a.jpg" });
   });
+  it("acha a foto principal em páginas da Amazon", () => {
+    const html = `<title>Echo Dot</title><img alt="x" src="https://m.media-amazon.com/images/I/71abc._AC_SX679_.jpg" id="landingImage" data-old-hires="https://m.media-amazon.com/images/I/71abc._AC_SL1000_.jpg">`;
+    expect(extractMetadata(html, "https://www.amazon.com.br/dp/X").image).toBe("https://m.media-amazon.com/images/I/71abc._AC_SL1000_.jpg");
+    expect(extractMetadata(`<script>{"hiRes":"https://m.media-amazon.com/images/I/81zz.jpg"}</script>`, "https://www.amazon.com.br/dp/X").image).toBe("https://m.media-amazon.com/images/I/81zz.jpg");
+  });
   it("ignora páginas de bloqueio e usa o link como alternativa", () => {
     expect(extractMetadata("<title>Robot Check</title>", "https://a.com").title).toBeNull();
     expect(titleFromUrl("https://www.magazineluiza.com.br/smart-tv-50-4k-samsung/p/236591400/et/tv4k/")).toBe("Smart tv 50 4k samsung");

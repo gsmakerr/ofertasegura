@@ -48,16 +48,21 @@ export default function OfferHistory({ refreshKey }: { refreshKey: number }) {
 
   useEffect(() => {
     let alive = true;
-    fetch("/api/historico", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((d) => {
-        if (!alive) return;
-        setOffers(Array.isArray(d.offers) ? d.offers : []);
-        setNow(Date.now());
-      })
-      .catch(() => alive && setOffers([]));
+    const load = () =>
+      fetch("/api/historico", { cache: "no-store" })
+        .then((r) => r.json())
+        .then((d) => {
+          if (!alive) return;
+          setOffers(Array.isArray(d.offers) ? d.offers : []);
+          setNow(Date.now());
+        })
+        .catch(() => alive && setOffers((cur) => cur ?? []));
+    load();
+    // A oferta recém-verificada é gravada logo depois da resposta: confere de novo em instantes.
+    const again = refreshKey > 0 ? setTimeout(load, 3000) : undefined;
     return () => {
       alive = false;
+      if (again) clearTimeout(again);
     };
   }, [refreshKey]);
 
