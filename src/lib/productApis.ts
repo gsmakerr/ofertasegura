@@ -69,9 +69,10 @@ export const amazonLastLog = () => [...amazonLog];
 export async function amazonProductInfo(
   url: URL,
   env: { id?: string; secret?: string; tag?: string } = {
-    id: process.env.AMAZON_CREATORS_CREDENTIAL_ID,
-    secret: process.env.AMAZON_CREATORS_CREDENTIAL_SECRET,
-    tag: process.env.AMAZON_ASSOCIATE_TAG,
+    // trim(): um espaço ou quebra de linha colados junto com a chave fazem a Amazon recusar.
+    id: process.env.AMAZON_CREATORS_CREDENTIAL_ID?.trim(),
+    secret: process.env.AMAZON_CREATORS_CREDENTIAL_SECRET?.trim(),
+    tag: process.env.AMAZON_ASSOCIATE_TAG?.trim(),
   },
   fetchImpl: typeof fetch = fetch,
 ): Promise<ProductInfo> {
@@ -93,7 +94,7 @@ export async function amazonProductInfo(
         signal: AbortSignal.timeout(3000),
       });
       const d = (await res.json()) as { access_token?: string; expires_in?: number; error?: string };
-      amazonLog.push(`token ${res.status}${d.error ? ` ${d.error}` : ""}`);
+      amazonLog.push(`token ${res.status}${d.error ? ` ${d.error}` : ""} (id ...${env.id!.slice(-6)}, secret com ${env.secret!.length} caracteres)`);
       return d.access_token ? { token: d.access_token, ttl: d.expires_in ?? 3600 } : null;
     });
     if (!token) return EMPTY;
@@ -166,8 +167,8 @@ export const mercadoLivreLastLog = () => [...mlLog];
 export async function mercadoLivreProductInfo(
   url: URL,
   env: { id?: string; secret?: string } = {
-    id: process.env.MERCADOLIVRE_CLIENT_ID,
-    secret: process.env.MERCADOLIVRE_CLIENT_SECRET,
+    id: process.env.MERCADOLIVRE_CLIENT_ID?.trim(),
+    secret: process.env.MERCADOLIVRE_CLIENT_SECRET?.trim(),
   },
   fetchImpl: typeof fetch = fetch,
 ): Promise<ProductInfo> {
