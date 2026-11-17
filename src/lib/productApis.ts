@@ -197,7 +197,26 @@ export async function mercadoLivreProductInfo(
       if (catalog) return parseMercadoLivre(await get(`/products/${catalog}`));
       return info;
     }
-    return EMPTY;
+
+    // Última tentativa: a busca pública, procurando pelo título do link e aceitando
+    // apenas o resultado com o MESMO código de anúncio (nunca a foto de outro produto).
+    const words = url.pathname
+      .replace(/^.*?MLB-?\d+-?/i, "")
+      .replace(/-_JM.*$/i, "")
+      .split(/[-_/]+/)
+      .filter((w) => w.length > 1)
+      .slice(0, 8)
+      .join(" ");
+    if (!words) return EMPTY;
+    const found = (await get(`/sites/MLB/search?q=${encodeURIComponent(words)}&limit=50`)) as
+      | { results?: { id?: string; title?: string; thumbnail?: string; secure_thumbnail?: string }[] }
+      | null;
+    const hit = found?.results?.find((r) => r.id === ids.id);
+    mlLog.push(`busca: ${found?.results?.length ?? 0} resultados, anúncio ${hit ? "encontrado" : "não encontrado"}`);
+    if (!hit) return EMPTY;
+    const info = parseMercadoLivre(hit);
+    // A miniatura da busca é pequena (-I); a versão maior usa o mesmo arquivo com sufixo -O.
+    return { ...info, image: info.image?.replace(/-I\.(jpg|webp)$/i, "-O.$1") ?? null };
   } catch {
     return EMPTY;
   }
