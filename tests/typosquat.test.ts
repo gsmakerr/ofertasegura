@@ -144,3 +144,21 @@ describe("metadados e segurança de rede", () => {
     expect(isPrivateIp("8.8.8.8")).toBe(false);
   });
 });
+
+import { hoje, somar, totalPeriodo, type Stats } from "@/lib/stats";
+describe("contador de uso", () => {
+  it("soma por dia e por detalhe", () => {
+    let s: Stats = { dias: {} };
+    s = somar(s, "oferta_parceira", "2026-11-17", "Amazon");
+    s = somar(s, "oferta_parceira", "2026-11-17", "Shopee");
+    s = somar(s, "visita", "2026-11-10");
+    expect(s.dias["2026-11-17"]).toEqual({ oferta_parceira: 2, "oferta_parceira:Amazon": 1, "oferta_parceira:Shopee": 1 });
+    const now = new Date("2026-11-17T15:00:00Z");
+    expect(totalPeriodo(s, 1, now).oferta_parceira).toBe(2);
+    expect(totalPeriodo(s, 7, now).visita).toBeUndefined();
+    expect(totalPeriodo(s, 0, now).visita).toBe(1);
+  });
+  it("usa o dia de Brasília", () => {
+    expect(hoje(new Date("2026-11-18T01:30:00Z"))).toBe("2026-11-17");
+  });
+});

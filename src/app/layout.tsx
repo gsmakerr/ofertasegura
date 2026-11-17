@@ -3,6 +3,7 @@ import "@fontsource-variable/bricolage-grotesque";
 import "@fontsource-variable/figtree";
 import "./globals.css";
 import ServiceWorker from "@/components/ServiceWorker";
+import UsageBeacon from "@/components/UsageBeacon";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -25,10 +26,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Oferta Segura",
     description: "Confira se a oferta e o site são verdadeiros antes de comprar.",
-    images: ["/icons/icon-512.png"],
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Oferta Segura: confira se a oferta é golpe antes de comprar" }],
     locale: "pt_BR",
     type: "website",
+    siteName: "Oferta Segura",
+    url: siteUrl,
   },
+  twitter: { card: "summary_large_image", images: ["/og.png"] },
+  alternates: { canonical: siteUrl },
 };
 
 export const viewport: Viewport = {
@@ -44,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-full flex flex-col">
         {children}
         <ServiceWorker />
+        <UsageBeacon />
       </body>
     </html>
   );

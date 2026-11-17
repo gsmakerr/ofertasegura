@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { extractHostname } from "@/lib/domain";
 import { clientIp, rateLimited } from "@/lib/netSafety";
 import { analyzeSite } from "@/lib/siteCheck";
+import { registrar } from "@/lib/stats";
 
 export const maxDuration = 10;
 
@@ -20,7 +21,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Digite um endereço de site válido, como lojaexemplo.com.br." }, { status: 400 });
   }
   try {
-    return NextResponse.json(await analyzeSite(host.replace(/^www\./, "")));
+    const report = await analyzeSite(host.replace(/^www\./, ""));
+    after(() => registrar(`site_${report.level}` as "site_confiavel" | "site_atencao" | "site_risco"));
+    return NextResponse.json(report);
   } catch {
     return NextResponse.json({ error: "A análise falhou. Tente de novo em instantes." }, { status: 500 });
   }

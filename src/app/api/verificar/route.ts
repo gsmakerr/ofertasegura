@@ -2,6 +2,7 @@ import { after, NextResponse } from "next/server";
 import { convertToAffiliate, detectStore, shopeeLastError, shopeeProductInfo } from "@/lib/affiliateConverter";
 import { rootDomain } from "@/lib/domain";
 import { addOffer } from "@/lib/historyStore";
+import { registrar } from "@/lib/stats";
 import { cleanTitle, extractMetadata, titleFromUrl } from "@/lib/metadata";
 import { amazonLastLog, amazonProductInfo, mercadoLivreLastLog, mercadoLivreProductInfo } from "@/lib/productApis";
 import { clientIp, followRedirects, PREVIEW_UA, rateLimited } from "@/lib/netSafety";
@@ -82,6 +83,9 @@ export async function POST(req: Request) {
   const title = meta.title || cleanTitle(titleFromUrl(page.finalUrl));
   const finalHost = new URL(page.finalUrl).hostname.toLowerCase();
   const clone = conversion.isAffiliate ? { status: "official" as const, brand: conversion.store! } : detectClone(finalHost);
+
+  // Contador de uso: por loja, depois de responder.
+  after(() => (conversion.isAffiliate ? registrar("oferta_parceira", conversion.store ?? undefined) : registrar("oferta_outra")));
 
   if (conversion.isAffiliate && conversion.store && title) {
     // Grava no histórico depois de responder, para o visitante não esperar por isso.
