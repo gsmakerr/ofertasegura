@@ -180,43 +180,10 @@ export async function mercadoLivreProductInfo(
     mlLog.length = 0;
     if (ids.kind === "products") return parseMercadoLivre(await get(`/products/${ids.id}`));
 
-    // Anúncio comum: a consulta direta pode ser recusada a aplicativos de terceiros;
-    // tenta a consulta em lote e, se o anúncio estiver ligado ao catálogo, a página do produto.
-    const direct = await get(`/items/${ids.id}`);
-    if (direct) return parseMercadoLivre(direct);
-    const multi = (await get(`/items?ids=${ids.id}&attributes=title,pictures,thumbnail,secure_thumbnail,catalog_product_id`)) as
-      | { code?: number; body?: Record<string, unknown> }[]
-      | null;
-    const first = Array.isArray(multi) ? multi[0] : undefined;
-    mlLog.push(`lote: código ${first?.code ?? "?"}, campos ${first?.body ? Object.keys(first.body).join(",").slice(0, 120) : "nenhum"}`);
-    const body = first?.code === 200 ? first.body : null;
-    if (body) {
-      const info = parseMercadoLivre(body);
-      if (info.image) return info;
-      const catalog = typeof body.catalog_product_id === "string" ? body.catalog_product_id : null;
-      if (catalog) return parseMercadoLivre(await get(`/products/${catalog}`));
-      return info;
-    }
-
-    // Última tentativa: a busca pública, procurando pelo título do link e aceitando
-    // apenas o resultado com o MESMO código de anúncio (nunca a foto de outro produto).
-    const words = url.pathname
-      .replace(/^.*?MLB-?\d+-?/i, "")
-      .replace(/-_JM.*$/i, "")
-      .split(/[-_/]+/)
-      .filter((w) => w.length > 1)
-      .slice(0, 8)
-      .join(" ");
-    if (!words) return EMPTY;
-    const found = (await get(`/sites/MLB/search?q=${encodeURIComponent(words)}&limit=50`)) as
-      | { results?: { id?: string; title?: string; thumbnail?: string; secure_thumbnail?: string }[] }
-      | null;
-    const hit = found?.results?.find((r) => r.id === ids.id);
-    mlLog.push(`busca: ${found?.results?.length ?? 0} resultados, anúncio ${hit ? "encontrado" : "não encontrado"}`);
-    if (!hit) return EMPTY;
-    const info = parseMercadoLivre(hit);
-    // A miniatura da busca é pequena (-I); a versão maior usa o mesmo arquivo com sufixo -O.
-    return { ...info, image: info.image?.replace(/-I\.(jpg|webp)$/i, "-O.$1") ?? null };
+    // Anúncio comum (MLB-123...): o Mercado Livre recusa os detalhes a aplicativos de terceiros
+    // (testado em 17/11/2026: /items, consulta em lote e busca deram 403). Fica uma única tentativa,
+    // para voltar a funcionar sozinho se a regra mudar; sem foto, o app mostra a inicial da loja.
+    return parseMercadoLivre(await get(`/items/${ids.id}`));
   } catch {
     return EMPTY;
   }
