@@ -52,7 +52,15 @@ const onNetlify = () =>
 
 async function blobStore() {
   const { getStore } = await import("@netlify/blobs");
-  return getStore({ name: "ofertasegura", consistency: "strong" });
+  return getStore("ofertasegura");
+}
+
+/** O histórico é complementar: se o armazenamento demorar, seguimos sem ele em vez de travar a página. */
+function withTimeout<T>(work: Promise<T>, ms = 2500): Promise<T> {
+  return Promise.race([
+    work,
+    new Promise<T>((_, reject) => setTimeout(() => reject(new Error("armazenamento lento")), ms)),
+  ]);
 }
 
 function sanitize(list: unknown): VerifiedOffer[] {
@@ -73,7 +81,7 @@ async function readAll(): Promise<VerifiedOffer[]> {
   }
   if (onNetlify()) {
     try {
-      return sanitize(await (await blobStore()).get(REDIS_KEY, { type: "json" }));
+      return sanitize(await withTimeout(blobStore().then((b) => b.get(REDIS_KEY, { type: "json" }))));
     } catch {
       return memory ?? [];
     }
@@ -98,7 +106,7 @@ async function writeAll(list: VerifiedOffer[]): Promise<void> {
   }
   if (onNetlify()) {
     try {
-      await (await blobStore()).setJSON(REDIS_KEY, list);
+      await withTimeout(blobStore().then((b) => b.setJSON(REDIS_KEY, list)));
       memory = null;
     } catch {
       memory = list;
