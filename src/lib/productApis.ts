@@ -62,6 +62,10 @@ export function parseAmazonItem(json: unknown): ProductInfo {
   };
 }
 
+/** Diagnóstico da última consulta à Amazon: etapas e códigos de resposta (sem chaves). */
+const amazonLog: string[] = [];
+export const amazonLastLog = () => [...amazonLog];
+
 export async function amazonProductInfo(
   url: URL,
   env: { id?: string; secret?: string; tag?: string } = {
@@ -72,6 +76,7 @@ export async function amazonProductInfo(
   fetchImpl: typeof fetch = fetch,
 ): Promise<ProductInfo> {
   const asin = amazonAsin(url);
+  amazonLog.length = 0;
   if (!asin || !env.id || !env.secret || !env.tag) return EMPTY;
   try {
     // Credenciais versão 3.1 (América do Norte e Brasil) usam o Login with Amazon.
@@ -87,7 +92,8 @@ export async function amazonProductInfo(
         }),
         signal: AbortSignal.timeout(3000),
       });
-      const d = (await res.json()) as { access_token?: string; expires_in?: number };
+      const d = (await res.json()) as { access_token?: string; expires_in?: number; error?: string };
+      amazonLog.push(`token ${res.status}${d.error ? ` ${d.error}` : ""}`);
       return d.access_token ? { token: d.access_token, ttl: d.expires_in ?? 3600 } : null;
     });
     if (!token) return EMPTY;
@@ -107,8 +113,16 @@ export async function amazonProductInfo(
       }),
       signal: AbortSignal.timeout(3500),
     });
-    return parseAmazonItem(await res.json());
-  } catch {
+    const body = await res.json();
+    if (!res.ok) {
+      const err = (body?.errors ?? body?.Errors)?.[0];
+      amazonLog.push(`getItems ${res.status} ${String(err?.code ?? err?.Code ?? "").slice(0, 60)}`);
+    } else {
+      amazonLog.push(`getItems ${res.status}`);
+    }
+    return parseAmazonItem(body);
+  } catch (e) {
+    amazonLog.push(`falha: ${e instanceof Error ? e.message.slice(0, 80) : "?"}`);
     return EMPTY;
   }
 }
