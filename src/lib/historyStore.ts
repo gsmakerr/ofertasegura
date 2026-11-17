@@ -26,6 +26,9 @@ const FILE = path.join(process.cwd(), "data", "verified-offers.json");
 const REDIS_KEY = "ofertasegura:verified-offers";
 
 let memory: VerifiedOffer[] | null = null;
+let lastStoreError: string | null = null;
+/** Diagnóstico: último erro do armazenamento do histórico (nunca contém chaves). */
+export const storeStatus = () => ({ netlify: onNetlify(), error: lastStoreError });
 let queue: Promise<unknown> = Promise.resolve();
 
 function redisConfig() {
@@ -47,8 +50,10 @@ async function redisCommand(cmd: string[]): Promise<unknown> {
   return ((await res.json()) as { result: unknown }).result;
 }
 
-const onNetlify = () =>
-  Boolean(process.env.NETLIFY || process.env.NETLIFY_BLOBS_CONTEXT || process.env.SITE_ID || process.env.AWS_LAMBDA_FUNCTION_NAME);
+function onNetlify() {
+  return Boolean(process.env.NETLIFY || process.env.NETLIFY_BLOBS_CONTEXT || process.env.SITE_ID || process.env.AWS_LAMBDA_FUNCTION_NAME);
+}
+
 
 async function blobStore() {
   const { getStore } = await import("@netlify/blobs");
@@ -81,8 +86,11 @@ async function readAll(): Promise<VerifiedOffer[]> {
   }
   if (onNetlify()) {
     try {
-      return sanitize(await withTimeout(blobStore().then((b) => b.get(REDIS_KEY, { type: "json" }))));
-    } catch {
+      const list = sanitize(await withTimeout(blobStore().then((b) => b.get(REDIS_KEY, { type: "json" }))));
+      lastStoreError = null;
+      return list;
+    } catch (e) {
+      lastStoreError = `leitura: ${e instanceof Error ? `${e.name}: ${e.message}` : String(e)}`.slice(0, 300);
       return memory ?? [];
     }
   }
@@ -108,7 +116,8 @@ async function writeAll(list: VerifiedOffer[]): Promise<void> {
     try {
       await withTimeout(blobStore().then((b) => b.setJSON(REDIS_KEY, list)));
       memory = null;
-    } catch {
+    } catch (e) {
+      lastStoreError = `gravação: ${e instanceof Error ? `${e.name}: ${e.message}` : String(e)}`.slice(0, 300);
       memory = list;
     }
     return;
