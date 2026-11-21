@@ -1,10 +1,9 @@
 import type { MetadataRoute } from "next";
+import { FEATURED_UPDATED } from "@/lib/featuredOffers";
 
-const site = process.env.NEXT_PUBLIC_SITE_URL || "https://ofertasegura.netlify.app";
+const site = (process.env.NEXT_PUBLIC_SITE_URL || "https://ofertasegura.netlify.app").replace(/\/$/, "");
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    { url: `${site}/`, changeFrequency: "daily", priority: 1 },
-    { url: `${site}/?aba=site`, changeFrequency: "weekly", priority: 0.8 },
-  ];
+  // Só a página principal: "/?aba=site" é a mesma página e o Google trata como cópia.
+  return [{ url: `${site}/`, lastModified: new Date(FEATURED_UPDATED), changeFrequency: "daily", priority: 1 }];
 }
