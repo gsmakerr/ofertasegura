@@ -7,7 +7,7 @@ import VerifyOffer from "./VerifyOffer";
 
 type Tab = "oferta" | "site";
 
-export default function App() {
+export default function App({ children }: { children?: React.ReactNode }) {
   const [tab, setTab] = useState<Tab>("oferta");
   const [sharedUrl, setSharedUrl] = useState("");
   const [siteDomain, setSiteDomain] = useState("");
@@ -82,6 +82,8 @@ export default function App() {
         <div hidden={tab !== "site"}>
           <SiteCheck initialDomain={siteDomain} />
         </div>
+
+        {children}
 
         {!installed && (
           <section className="mt-10 flex items-center gap-4 rounded-3xl bg-petrol p-5 text-white">
