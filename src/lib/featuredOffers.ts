@@ -11,49 +11,49 @@ export interface FeaturedOffer {
   url: string;
 }
 
-export const FEATURED_UPDATED = "2026-11-21";
+export const FEATURED_UPDATED = "2026-11-24";
 
 export const FEATURED_OFFERS: FeaturedOffer[] = [
   {
-    title: "Batedeira Planetária Philco 900W 5L",
+    title: "Air Fryer Forno Mondial 12 L (AFON-12L-BG)",
     store: "Mercado Livre",
-    highlight: "12 velocidades + turbo, 3 batedores em aço. Nota 4,8.",
-    image: "/ofertas/batedeira-philco.webp",
-    url: "https://meli.la/1RtL3P8",
+    highlight: "2 em 1 com 3 assadeiras e painel digital de 10 funções. Nota 4,9.",
+    image: "/ofertas/oferta-1.webp",
+    url: "https://meli.la/1THsmV8",
   },
   {
-    title: "Mini Processador Sem Fio 250 ml",
+    title: "Protetor de Colchão Impermeável Jacquard",
     store: "Shopee",
-    highlight: "Tritura alho, cebola e carne; recarrega no USB. Nota 4,7.",
-    image: "/ofertas/mini-processador.webp",
-    url: "https://s.shopee.com.br/6L6BOiwPGN",
+    highlight: "100% impermeável e super silencioso, para colchões até 40 cm. Nota 4,9.",
+    image: "/ofertas/oferta-2.webp",
+    url: "https://s.shopee.com.br/9071M9iPtU",
   },
   {
-    title: "Lavadora de Alta Pressão Kärcher Compacta 1.500 PSI",
+    title: "Vídeo Porteiro Intelbras IVR 1010",
     store: "Mercado Livre",
-    highlight: "Aplicador de detergente e lança regulável. Nota 4,8.",
-    image: "/ofertas/lavadora-karcher.webp",
-    url: "https://meli.la/1CpQq9V",
+    highlight: "Tela colorida e abertura da porta pelo monitor. Nota 4,8.",
+    image: "/ofertas/oferta-3.webp",
+    url: "https://meli.la/2P2ZjPU",
   },
   {
-    title: "Cetaphil Loção Hidratante Advanced 473 ml",
+    title: "Fone de Ouvido Bluetooth Philips TAT1109",
     store: "Mercado Livre",
-    highlight: "Para pele seca e sensível, sem fragrância. Nota 4,9.",
-    image: "/ofertas/cetaphil-473ml.webp",
-    url: "https://meli.la/2vjj6cm",
+    highlight: "Sem fio TWS com resistência à água IPX4. Nota 4,8.",
+    image: "/ofertas/oferta-4.webp",
+    url: "https://meli.la/1JF6JnD",
   },
   {
-    title: "Cascata de Natal LED (5 m ou 10 m)",
+    title: "Capa para Máquina de Lavar Impermeável",
     store: "Shopee",
-    highlight: "200 ou 400 LEDs, 8 funções ou fixo. Nota 4,9.",
-    image: "/ofertas/cascata-led-natal.webp",
-    url: "https://s.shopee.com.br/2gCt1sVCid",
+    highlight: "Flanelada e reforçada, serve de 9 a 18 kg. Nota 4,6.",
+    image: "/ofertas/oferta-5.webp",
+    url: "https://s.shopee.com.br/2qWO0psDke",
   },
   {
-    title: "Mop Giratório com Cesto Inox + 2 Refis",
+    title: "Petisqueira de Natal em Madeira Pinus",
     store: "Shopee",
-    highlight: "Cabo de 140 cm e balde com centrífuga. Nota 4,8.",
-    image: "/ofertas/mop-giratorio.webp",
-    url: "https://s.shopee.com.br/BVY3OogFk",
+    highlight: "Formatos natalinos para mesa posta e petiscos. Nota 4,9.",
+    image: "/ofertas/oferta-6.webp",
+    url: "https://s.shopee.com.br/4qHSOY1Szu",
   },
 ];
