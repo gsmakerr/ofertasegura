@@ -11,49 +11,49 @@ export interface FeaturedOffer {
   url: string;
 }
 
-export const FEATURED_UPDATED = "2026-11-24";
+export const FEATURED_UPDATED = "2026-11-25";
 
 export const FEATURED_OFFERS: FeaturedOffer[] = [
   {
-    title: "Air Fryer Forno Mondial 12 L (AFON-12L-BG)",
+    title: "Mala de Bordo Wilson 19\"",
     store: "Mercado Livre",
-    highlight: "2 em 1 com 3 assadeiras e painel digital de 10 funções. Nota 4,9.",
+    highlight: "Rodas duplas 360° e tamanho aceito pela ANAC (até 10 kg). Nota 4,8.",
     image: "/ofertas/oferta-1.webp",
-    url: "https://meli.la/1THsmV8",
+    url: "https://meli.la/1SYAG25",
   },
   {
-    title: "Protetor de Colchão Impermeável Jacquard",
+    title: "Kit Utensílios de Silicone com Cabo de Madeira",
     store: "Shopee",
-    highlight: "100% impermeável e super silencioso, para colchões até 40 cm. Nota 4,9.",
+    highlight: "Não risca a panela e aguenta altas temperaturas. Nota 4,8.",
     image: "/ofertas/oferta-2.webp",
-    url: "https://s.shopee.com.br/9071M9iPtU",
+    url: "https://s.shopee.com.br/5qA1BE3i6r",
   },
   {
-    title: "Vídeo Porteiro Intelbras IVR 1010",
+    title: "Impressora Multifuncional Epson EcoTank L4360",
     store: "Mercado Livre",
-    highlight: "Tela colorida e abertura da porta pelo monitor. Nota 4,8.",
+    highlight: "Wi-Fi e tanque de tinta com kit de tintas incluso. Nota 4,9.",
     image: "/ofertas/oferta-3.webp",
-    url: "https://meli.la/2P2ZjPU",
+    url: "https://meli.la/2Yb2jVB",
   },
   {
-    title: "Fone de Ouvido Bluetooth Philips TAT1109",
+    title: "Smartphone Motorola Moto G06 64 GB",
     store: "Mercado Livre",
-    highlight: "Sem fio TWS com resistência à água IPX4. Nota 4,8.",
+    highlight: "Tela de 6,9\" e bateria de 5200 mAh. Nota 4,9.",
     image: "/ofertas/oferta-4.webp",
-    url: "https://meli.la/1JF6JnD",
+    url: "https://meli.la/2a8KYfk",
   },
   {
-    title: "Capa para Máquina de Lavar Impermeável",
+    title: "Toalha Banhão + Rosto 100% Algodão",
     store: "Shopee",
-    highlight: "Flanelada e reforçada, serve de 9 a 18 kg. Nota 4,6.",
+    highlight: "Macia e com alta absorção, em várias cores. Nota 4,8.",
     image: "/ofertas/oferta-5.webp",
-    url: "https://s.shopee.com.br/2qWO0psDke",
+    url: "https://s.shopee.com.br/7KyoxzonTo",
   },
   {
-    title: "Petisqueira de Natal em Madeira Pinus",
+    title: "Lixeira Inox 9 L com Tampa Click",
     store: "Shopee",
-    highlight: "Formatos natalinos para mesa posta e petiscos. Nota 4,9.",
+    highlight: "Tampa click de abertura fácil, para cozinha ou banheiro. Nota 4,7.",
     image: "/ofertas/oferta-6.webp",
-    url: "https://s.shopee.com.br/4qHSOY1Szu",
+    url: "https://s.shopee.com.br/gRv1keZgb",
   },
 ];
