@@ -94,7 +94,7 @@ export async function amazonProductInfo(
         signal: AbortSignal.timeout(3000),
       });
       const d = (await res.json()) as { access_token?: string; expires_in?: number; error?: string };
-      amazonLog.push(`token ${res.status}${d.error ? ` ${d.error}` : ""} (id ...${env.id!.slice(-6)}, secret com ${env.secret!.length} caracteres)`);
+      amazonLog.push(`token ${res.status}${d.error ? ` ${d.error}` : ""}`);
       return d.access_token ? { token: d.access_token, ttl: d.expires_in ?? 3600 } : null;
     });
     if (!token) return EMPTY;
