@@ -11,49 +11,49 @@ export interface FeaturedOffer {
   url: string;
 }
 
-export const FEATURED_UPDATED = "2026-11-25";
+export const FEATURED_UPDATED = "2026-11-26";
 
 export const FEATURED_OFFERS: FeaturedOffer[] = [
   {
-    title: "Mala de Bordo Wilson 19\"",
+    title: "Ventilador de Mesa Mondial Super Power 30 cm",
     store: "Mercado Livre",
-    highlight: "Rodas duplas 360° e tamanho aceito pela ANAC (até 10 kg). Nota 4,8.",
+    highlight: "Hélice de 6 pás e 3 velocidades com baixo ruído. Nota 4,8.",
     image: "/ofertas/oferta-1.webp",
-    url: "https://meli.la/1SYAG25",
+    url: "https://meli.la/2U6EDqJ",
   },
   {
-    title: "Kit Utensílios de Silicone com Cabo de Madeira",
+    title: "Guirlanda de Natal para Porta",
     store: "Shopee",
-    highlight: "Não risca a panela e aguenta altas temperaturas. Nota 4,8.",
+    highlight: "Formato árvore ou redonda, com opção de luzinha LED. Nota 4,8.",
     image: "/ofertas/oferta-2.webp",
-    url: "https://s.shopee.com.br/5qA1BE3i6r",
+    url: "https://s.shopee.com.br/8fUE9KWxe0",
   },
   {
-    title: "Impressora Multifuncional Epson EcoTank L4360",
+    title: "Fone de Ouvido JBL Tune 530BT",
     store: "Mercado Livre",
-    highlight: "Wi-Fi e tanque de tinta com kit de tintas incluso. Nota 4,9.",
+    highlight: "Até 76 h de bateria e Bluetooth multiponto. Nota 4,9.",
     image: "/ofertas/oferta-3.webp",
-    url: "https://meli.la/2Yb2jVB",
+    url: "https://meli.la/2nnHDur",
   },
   {
-    title: "Smartphone Motorola Moto G06 64 GB",
-    store: "Mercado Livre",
-    highlight: "Tela de 6,9\" e bateria de 5200 mAh. Nota 4,9.",
+    title: "Tira Manchas Percarbonato de Sódio Calisul",
+    store: "Shopee",
+    highlight: "Sem cloro e clareia roupas brancas e coloridas. Nota 4,9.",
     image: "/ofertas/oferta-4.webp",
-    url: "https://meli.la/2a8KYfk",
+    url: "https://s.shopee.com.br/60TSyRyEvI",
   },
   {
-    title: "Toalha Banhão + Rosto 100% Algodão",
-    store: "Shopee",
-    highlight: "Macia e com alta absorção, em várias cores. Nota 4,8.",
+    title: "Batedeira Mondial Prática B-44",
+    store: "Mercado Livre",
+    highlight: "Tigela de 3,6 L e 3 velocidades + turbo. Nota 4,8.",
     image: "/ofertas/oferta-5.webp",
-    url: "https://s.shopee.com.br/7KyoxzonTo",
+    url: "https://meli.la/33w7vw2",
   },
   {
-    title: "Lixeira Inox 9 L com Tampa Click",
+    title: "Cortina de LED 300 LEDs 3x3 m",
     store: "Shopee",
-    highlight: "Tampa click de abertura fácil, para cozinha ou banheiro. Nota 4,7.",
+    highlight: "8 modos de iluminação, em luz quente ou fria. Nota 4,8.",
     image: "/ofertas/oferta-6.webp",
-    url: "https://s.shopee.com.br/gRv1keZgb",
+    url: "https://s.shopee.com.br/2BGkPTK9ae",
   },
 ];
