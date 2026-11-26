@@ -2,7 +2,6 @@
  * Diagnóstico "Site Confiável?": idade do domínio (RDAP), certificado SSL,
  * detector de clone, DNS/IP e pontuação final de 0 a 100.
  */
-import tls from "node:tls";
 import { domainLabel, rootDomain } from "./domain";
 import { resolvePublic } from "./netSafety";
 import { detectClone, type CloneResult } from "./typosquat";
@@ -18,9 +17,6 @@ export interface DomainAge {
 export interface SslInfo {
   checked: boolean;
   valid: boolean;
-  issuer: string | null;
-  validTo: string | null;
-  daysLeft: number | null;
   error?: string;
 }
 
@@ -89,7 +85,8 @@ export async function lookupDomainAge(domain: string, fetchImpl: typeof fetch = 
     : `https://rdap.org/domain/${domain}`;
   try {
     const res = await fetchImpl(url, {
-      headers: { Accept: "application/rdap+json, application/json" },
+      // O rdap.org recusa (403) pedidos sem identificação.
+      headers: { Accept: "application/rdap+json, application/json", "User-Agent": "OfertaSegura/1.0" },
       signal: AbortSignal.timeout(6000),
       redirect: "follow",
     });
@@ -102,34 +99,32 @@ export async function lookupDomainAge(domain: string, fetchImpl: typeof fetch = 
 }
 
 // ---------- SSL/TLS ----------
-export function checkSsl(host: string, ip?: string): Promise<SslInfo> {
-  return new Promise((resolve) => {
-    let done = false;
-    const finish = (info: SslInfo) => {
-      if (done) return;
-      done = true;
-      socket.destroy();
-      resolve(info);
-    };
-    const socket = tls.connect({ host: ip || host, port: 443, servername: host, rejectUnauthorized: false, timeout: 5000 }, () => {
-      const cert = socket.getPeerCertificate();
-      if (!cert || !cert.valid_to) {
-        return finish({ checked: true, valid: false, issuer: null, validTo: null, daysLeft: null, error: "Sem certificado" });
-      }
-      const validTo = new Date(cert.valid_to);
-      const issuer = cert.issuer?.O || cert.issuer?.CN || null;
-      finish({
-        checked: true,
-        valid: socket.authorized,
-        issuer: Array.isArray(issuer) ? issuer[0] : issuer,
-        validTo: validTo.toISOString(),
-        daysLeft: Math.floor((validTo.getTime() - Date.now()) / DAY),
-        error: socket.authorized ? undefined : String(socket.authorizationError || "Certificado inválido"),
-      });
-    });
-    socket.on("timeout", () => finish({ checked: true, valid: false, issuer: null, validTo: null, daysLeft: null, error: "Sem resposta na porta segura (443)" }));
-    socket.on("error", () => finish({ checked: true, valid: false, issuer: null, validTo: null, daysLeft: null, error: "Site não aceita conexão segura (HTTPS)" }));
-  });
+// O Cloudflare não deixa ler o certificado, mas recusa a conexão quando ele é inválido:
+// se o site responde por HTTPS, o certificado passou na conferência.
+const SSL_ERROS: [RegExp, string][] = [
+  [/expired|NotValidYet/i, "Certificado vencido ou fora da validade"],
+  [/NotValidForName/i, "O certificado é de outro endereço"],
+  [/UnknownIssuer|self.signed/i, "Certificado não foi emitido por uma autoridade reconhecida"],
+  [/certificate/i, "Certificado inválido"],
+];
+const SEM_HTTPS = "Site não aceita conexão segura (HTTPS)";
+/** Códigos que o Cloudflare devolve quando não consegue conectar com segurança ao site. */
+const CF_FALHAS = [520, 521, 522, 523, 524, 525, 526];
+
+export async function checkSsl(host: string, fetchImpl: typeof fetch = fetch): Promise<SslInfo> {
+  try {
+    const res = await fetchImpl(`https://${host}/`, { method: "HEAD", redirect: "manual", signal: AbortSignal.timeout(5000) });
+    res.body?.cancel().catch(() => {});
+    if (res.status === 526) return { checked: true, valid: false, error: "Certificado inválido" };
+    if (CF_FALHAS.includes(res.status)) return { checked: true, valid: false, error: SEM_HTTPS };
+    return { checked: true, valid: true };
+  } catch (e) {
+    if (e instanceof Error && e.name === "TimeoutError") {
+      return { checked: true, valid: false, error: "Sem resposta na porta segura (443)" };
+    }
+    const message = e instanceof Error ? `${e.message} ${String(e.cause ?? "")}` : String(e);
+    return { checked: true, valid: false, error: SSL_ERROS.find(([re]) => re.test(message))?.[1] ?? SEM_HTTPS };
+  }
 }
 
 // ---------- Pontuação ----------
@@ -166,8 +161,7 @@ export function computeScore(input: { age: DomainAge; ssl: SslInfo; clone: Clone
     alerts.push("O endereço não está no ar (não aponta para nenhum servidor).");
   } else if (ssl.valid) {
     score += 15;
-    positives.push(`Conexão segura (HTTPS) válida${ssl.issuer ? `, emitida por ${ssl.issuer}` : ""}.`);
-    if (ssl.daysLeft !== null && ssl.daysLeft < 7) alerts.push("O certificado de segurança vence em poucos dias.");
+    positives.push("Conexão segura (HTTPS) válida.");
   } else {
     score -= 25;
     alerts.push(`Sem conexão segura válida: ${ssl.error || "certificado inválido"}. Não digite dados nem senha.`);
@@ -217,8 +211,8 @@ export async function analyzeSite(host: string): Promise<SiteReport> {
   const [age, ssl] = await Promise.all([
     lookupDomainAge(domain),
     dns.resolves
-      ? checkSsl(reachable, dns.ip || undefined)
-      : Promise.resolve<SslInfo>({ checked: false, valid: false, issuer: null, validTo: null, daysLeft: null, error: "Site fora do ar" }),
+      ? checkSsl(reachable)
+      : Promise.resolve<SslInfo>({ checked: false, valid: false, error: "Site fora do ar" }),
   ]);
 
   return {

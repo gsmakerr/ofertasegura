@@ -30,16 +30,21 @@ Depois de editar, reinicie o servidor. **Na hospedagem**, cadastre os mesmos nom
 
 ## 2. Publicar (necessário para instalar no celular)
 
-O botão "Instalar app" só funciona em endereço **https**. O projeto está preparado para o **Netlify**:
+O botão "Instalar app" só funciona em endereço **https**. O site é publicado no **Cloudflare Workers** (plano grátis):
 
-1. O código fica em um repositório no GitHub.
-2. Em [app.netlify.com](https://app.netlify.com), "Add new project" > "Import an existing project", escolha o repositório.
-3. Em "Environment variables", cadastre as mesmas variáveis do `minhas-ids.txt` e `NEXT_PUBLIC_SITE_URL` com o endereço final.
-4. Deploy. A cada alteração enviada ao GitHub, o Netlify publica de novo sozinho.
+1. O código fica em um repositório no GitHub, ligado ao Worker `ofertasegura` (Workers Builds).
+2. Comando de build: `npx opennextjs-cloudflare build`. Comando de publicação: `npx opennextjs-cloudflare deploy`.
+3. Endereço do site: https://ofertasegura.pages.dev (para trocar, use a variável de **build** `NEXT_PUBLIC_SITE_URL`).
+4. IDs e chaves ficam como secrets do Worker (`npx wrangler secret put NOME`).
+5. Cada commit na branch `main` publica o site sozinho.
+6. O endereço público vem do projeto Pages em `pages-proxy/`, que só repassa os acessos ao Worker. Publica uma vez só,
+   dentro dessa pasta: `npx wrangler pages deploy --branch main`.
 
-**Histórico na hospedagem:** no Netlify o histórico de ofertas é guardado automaticamente no Netlify Blobs,
-sem configurar nada. Em outra hospedagem serverless, use Upstash (`UPSTASH_REDIS_REST_URL` e
-`UPSTASH_REDIS_REST_TOKEN`). No seu PC ou em VPS, vale o arquivo `data/verified-offers.json`.
+Testar como no Cloudflare, no computador: `npm run preview`.
+
+**Histórico na hospedagem:** no Cloudflare, o histórico de ofertas e o contador do `/painel` ficam no KV
+(binding `OFERTAS_KV` no `wrangler.jsonc`). Em outra hospedagem serverless, use Upstash para o histórico
+(`UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN`). No seu PC ou em VPS, vale o arquivo `data/verified-offers.json`.
 
 Obs.: o plano gratuito da Vercel não permite sites com links de afiliado.
 
@@ -72,7 +77,7 @@ do próprio link e a imagem fica com um marcador no lugar.
 ```
 src/lib/affiliateConverter.ts   conversão para links de afiliado (4 lojas)
 src/lib/typosquat.ts            detector de clones; a lista de marcas (BRANDS) é editável
-src/lib/siteCheck.ts            idade do domínio (RDAP), SSL, nota de 0 a 100
+src/lib/siteCheck.ts            idade do domínio (RDAP), HTTPS válido, nota de 0 a 100
 src/lib/historyStore.ts         últimas 20 ofertas (JSON local, Upstash ou memória)
 src/lib/netSafety.ts            desencurtador + proteção contra abuso do servidor + limite por IP
 src/app/api/                    verificar, checar-site, historico

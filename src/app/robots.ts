@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const site = (process.env.NEXT_PUBLIC_SITE_URL || "https://ofertasegura.netlify.app").replace(/\/$/, "");
+const site = (process.env.NEXT_PUBLIC_SITE_URL || "https://ofertasegura.pages.dev").replace(/\/$/, "");
 
 export default function robots(): MetadataRoute.Robots {
   return {

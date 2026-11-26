@@ -59,7 +59,7 @@ describe("detector de clones", () => {
 });
 
 describe("pontuação", () => {
-  const ssl = { checked: true, valid: true, issuer: "Let's Encrypt", validTo: null, daysLeft: 60 };
+  const ssl = { checked: true, valid: true };
   const dns = { resolves: true, ip: "1.2.3.4" };
   const age = (d: number | null) => ({ createdAt: null, ageDays: d, holder: null });
 

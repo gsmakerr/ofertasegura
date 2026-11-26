@@ -47,3 +47,9 @@ next-env.d.ts
 
 # suas IDs de afiliado (nunca publique)
 minhas-ids.txt
+
+# Cloudflare / OpenNext
+/.open-next/
+/.wrangler/
+.dev.vars*
+.netlify/

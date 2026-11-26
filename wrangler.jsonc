@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ofertasegura",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-11-20",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+    // Sem redirecionar ".html": o Google confere a propriedade do site pelo endereço exato do arquivo.
+    "html_handling": "none"
+  },
+  // O endereço público é https://ofertasegura.pages.dev (pasta pages-proxy), por isso o workers.dev fica desligado.
+  "workers_dev": false,
+  "preview_urls": false,
+  // Histórico das ofertas verificadas e contador de uso do /painel.
+  "kv_namespaces": [{ "binding": "OFERTAS_KV", "id": "7ea5be48d4844b1bb03354a1f0589032" }],
+  // Mantém as variáveis cadastradas pelo painel do Cloudflare a cada publicação.
+  "keep_vars": true,
+  "observability": { "enabled": true }
+}

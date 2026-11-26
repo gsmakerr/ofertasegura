@@ -3,7 +3,7 @@
  *
  * Camadas, escolhidas automaticamente:
  *  1. Upstash Redis (se UPSTASH_REDIS_REST_URL e UPSTASH_REDIS_REST_TOKEN existirem).
- *  2. Netlify Blobs, quando o site roda no Netlify (não precisa configurar nada).
+ *  2. Cloudflare KV, quando o site roda no Cloudflare (binding OFERTAS_KV).
  *  3. Arquivo JSON local em data/verified-offers.json (padrão; ideal no PC ou em VPS).
  *  4. Memória, como último recurso, se nada acima estiver disponível.
  */
@@ -11,6 +11,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { Store } from "./affiliateConverter";
+import { kv, onCloudflare } from "./kvStore";
 
 export interface VerifiedOffer {
   id: string;
@@ -28,7 +29,7 @@ const REDIS_KEY = "ofertasegura:verified-offers";
 let memory: VerifiedOffer[] | null = null;
 let lastStoreError: string | null = null;
 /** Diagnóstico: último erro do armazenamento do histórico (nunca contém chaves). */
-export const storeStatus = () => ({ netlify: onNetlify(), error: lastStoreError });
+export const storeStatus = () => ({ cloudflare: onCloudflare(), error: lastStoreError });
 let queue: Promise<unknown> = Promise.resolve();
 
 function redisConfig() {
@@ -48,16 +49,6 @@ async function redisCommand(cmd: string[]): Promise<unknown> {
   });
   if (!res.ok) throw new Error(`Redis ${res.status}`);
   return ((await res.json()) as { result: unknown }).result;
-}
-
-function onNetlify() {
-  return Boolean(process.env.NETLIFY || process.env.NETLIFY_BLOBS_CONTEXT || process.env.SITE_ID || process.env.AWS_LAMBDA_FUNCTION_NAME);
-}
-
-
-async function blobStore() {
-  const { getStore } = await import("@netlify/blobs");
-  return getStore("ofertasegura");
 }
 
 /** O histórico é complementar: se o armazenamento demorar, seguimos sem ele em vez de travar a página. */
@@ -84,9 +75,9 @@ async function readAll(): Promise<VerifiedOffer[]> {
       return memory ?? [];
     }
   }
-  if (onNetlify()) {
+  if (onCloudflare()) {
     try {
-      const list = sanitize(await withTimeout(blobStore().then((b) => b.get(REDIS_KEY, { type: "json" }))));
+      const list = sanitize(await withTimeout(kv().get(REDIS_KEY, "json")));
       lastStoreError = null;
       return list;
     } catch (e) {
@@ -112,9 +103,9 @@ async function writeAll(list: VerifiedOffer[]): Promise<void> {
       return;
     }
   }
-  if (onNetlify()) {
+  if (onCloudflare()) {
     try {
-      await withTimeout(blobStore().then((b) => b.setJSON(REDIS_KEY, list)));
+      await withTimeout(kv().put(REDIS_KEY, JSON.stringify(list)));
       memory = null;
     } catch (e) {
       lastStoreError = `gravação: ${e instanceof Error ? `${e.name}: ${e.message}` : String(e)}`.slice(0, 300);

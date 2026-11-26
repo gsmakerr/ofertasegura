@@ -9,7 +9,7 @@ interface Report {
   positives: string[];
   alerts: string[];
   age: { createdAt: string | null; ageDays: number | null; holder: string | null; error?: string };
-  ssl: { valid: boolean; issuer: string | null; validTo: string | null; daysLeft: number | null; error?: string };
+  ssl: { valid: boolean; error?: string };
   clone: { status: "official" | "clone" | "none"; brand?: string; reason?: string };
   dns: { resolves: boolean; ip: string | null };
   links: { reclameAqui: string; googleTransparencia: string; receitaCnpj: string };
@@ -196,7 +196,7 @@ export default function SiteCheck({ initialDomain }: { initialDomain: string }) 
                 value={report.ssl.valid ? "Válido" : report.dns.resolves ? "Inválido ou ausente" : "Não verificado"}
                 detail={
                   report.ssl.valid
-                    ? `Emitido por ${report.ssl.issuer || "autoridade reconhecida"}. Vence em ${dateBR(report.ssl.validTo)}.`
+                    ? "Conexão segura conferida: certificado aceito e dentro da validade."
                     : report.ssl.error
                 }
               />

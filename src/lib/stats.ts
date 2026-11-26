@@ -2,10 +2,11 @@
  * Contador de uso do Oferta Segura — só números agregados por dia, nenhum dado pessoal
  * (sem IP, sem cookie, sem identificador de visitante). Por isso não exige aviso de cookies.
  *
- * Guardado no Netlify Blobs quando o site roda no Netlify; no PC, em data/stats.json.
+ * Guardado no Cloudflare KV quando o site roda no Cloudflare; no PC, em data/stats.json.
  */
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import { kv, onCloudflare } from "./kvStore";
 
 export type Evento =
   | "visita" // abriu o site (uma vez por sessão do navegador)
@@ -28,14 +29,6 @@ const FILE = path.join(process.cwd(), "data", "stats.json");
 const KEY = "ofertasegura:stats";
 const MAX_DIAS = 400;
 
-const onNetlify = () =>
-  Boolean(process.env.NETLIFY || process.env.NETLIFY_BLOBS_CONTEXT || process.env.SITE_ID || process.env.AWS_LAMBDA_FUNCTION_NAME);
-
-async function store() {
-  const { getStore } = await import("@netlify/blobs");
-  return getStore("ofertasegura");
-}
-
 function timeout<T>(p: Promise<T>, ms = 4000): Promise<T> {
   return Promise.race([p, new Promise<T>((_, r) => setTimeout(() => r(new Error("lento")), ms))]);
 }
@@ -47,8 +40,8 @@ export function hoje(now = new Date()): string {
 
 export async function lerStats(): Promise<Stats> {
   try {
-    if (onNetlify()) {
-      const s = (await timeout((await store()).get(KEY, { type: "json" }))) as Stats | null;
+    if (onCloudflare()) {
+      const s = (await timeout(kv().get(KEY, "json"))) as Stats | null;
       return s?.dias ? s : { dias: {} };
     }
     return JSON.parse(await fs.readFile(FILE, "utf8"));
@@ -58,8 +51,8 @@ export async function lerStats(): Promise<Stats> {
 }
 
 async function gravar(s: Stats) {
-  if (onNetlify()) {
-    await timeout((await store()).setJSON(KEY, s));
+  if (onCloudflare()) {
+    await timeout(kv().put(KEY, JSON.stringify(s)));
     return;
   }
   await fs.mkdir(path.dirname(FILE), { recursive: true });
