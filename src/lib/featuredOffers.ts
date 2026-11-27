@@ -11,49 +11,49 @@ export interface FeaturedOffer {
   url: string;
 }
 
-export const FEATURED_UPDATED = "2026-11-26";
+export const FEATURED_UPDATED = "2026-11-27";
 
 export const FEATURED_OFFERS: FeaturedOffer[] = [
   {
-    title: "Ventilador de Mesa Mondial Super Power 30 cm",
+    title: "Air Fryer Oven Philco 16L Digital com Visor",
     store: "Mercado Livre",
-    highlight: "Hélice de 6 pás e 3 velocidades com baixo ruído. Nota 4,8.",
+    highlight: "8 funções pré-programadas e visor de vidro. Nota 4,9.",
     image: "/ofertas/oferta-1.webp",
-    url: "https://meli.la/2U6EDqJ",
+    url: "https://meli.la/2KYnT6T",
   },
   {
-    title: "Guirlanda de Natal para Porta",
+    title: "Power Bank Mini 10.000 mAh com Cabo Embutido",
     store: "Shopee",
-    highlight: "Formato árvore ou redonda, com opção de luzinha LED. Nota 4,8.",
+    highlight: "Cabe no bolso e carrega 2 aparelhos ao mesmo tempo. Nota 4,6.",
     image: "/ofertas/oferta-2.webp",
-    url: "https://s.shopee.com.br/8fUE9KWxe0",
+    url: "https://s.shopee.com.br/7Kys9qRaVr",
   },
   {
-    title: "Fone de Ouvido JBL Tune 530BT",
+    title: "Soundbar LG S40T 300W com Subwoofer",
     store: "Mercado Livre",
-    highlight: "Até 76 h de bateria e Bluetooth multiponto. Nota 4,9.",
+    highlight: "Sistema 2.1 com subwoofer e Bluetooth. Nota 4,9.",
     image: "/ofertas/oferta-3.webp",
-    url: "https://meli.la/2nnHDur",
+    url: "https://meli.la/2jqmBD1",
   },
   {
-    title: "Tira Manchas Percarbonato de Sódio Calisul",
-    store: "Shopee",
-    highlight: "Sem cloro e clareia roupas brancas e coloridas. Nota 4,9.",
-    image: "/ofertas/oferta-4.webp",
-    url: "https://s.shopee.com.br/60TSyRyEvI",
-  },
-  {
-    title: "Batedeira Mondial Prática B-44",
+    title: "Tablet Samsung Galaxy Tab S10 Lite 128 GB",
     store: "Mercado Livre",
-    highlight: "Tigela de 3,6 L e 3 velocidades + turbo. Nota 4,8.",
-    image: "/ofertas/oferta-5.webp",
-    url: "https://meli.la/33w7vw2",
+    highlight: "Tela de 10,9\" a 90 Hz e S Pen inclusa. Nota 4,9.",
+    image: "/ofertas/oferta-4.webp",
+    url: "https://meli.la/2hVGZ3F",
   },
   {
-    title: "Cortina de LED 300 LEDs 3x3 m",
+    title: "Pote Hermético de Vidro 370 ml com Travas",
     store: "Shopee",
-    highlight: "8 modos de iluminação, em luz quente ou fria. Nota 4,8.",
+    highlight: "Vedação hermética e corpo transparente. Nota 4,9.",
+    image: "/ofertas/oferta-5.webp",
+    url: "https://s.shopee.com.br/AKcTjN2Z1u",
+  },
+  {
+    title: "Kit Organizador de Pia sem Furar",
+    store: "Shopee",
+    highlight: "Suporte para rodo, pano e esponja, com fita adesiva. Nota 4,8.",
     image: "/ofertas/oferta-6.webp",
-    url: "https://s.shopee.com.br/2BGkPTK9ae",
+    url: "https://s.shopee.com.br/7AfRxYf5Pf",
   },
 ];
